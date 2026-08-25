@@ -1,17 +1,22 @@
 import React, { useState } from 'react';
 import AddProductWizard from './components/AddProductWizard';
 import ProductExplorer from './components/ProductExplorer';
+import LoginPage from './components/LoginPage';
 import { 
   PackagePlus, 
   Grid, 
   Settings, 
   Server, 
   Layers, 
-  ExternalLink,
-  ShieldCheck
+  LogOut
 } from 'lucide-react';
 
 export default function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    () =>
+      localStorage.getItem('jt_auth') === 'true' ||
+      sessionStorage.getItem('jt_auth') === 'true'
+  );
   const [activeTab, setActiveTab] = useState('add');
   const [apiBaseUrl, setApiBaseUrl] = useState(
     process.env.REACT_APP_API_URL || 'https://jaytraders-5.onrender.com'
@@ -19,11 +24,24 @@ export default function App() {
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [tempApiUrl, setTempApiUrl] = useState(apiBaseUrl);
 
+  const handleLogin = () => setIsLoggedIn(true);
+
+  const handleLogout = () => {
+    localStorage.removeItem('jt_auth');
+    sessionStorage.removeItem('jt_auth');
+    setIsLoggedIn(false);
+  };
+
   const handleSaveApiUrl = (e) => {
     e.preventDefault();
     setApiBaseUrl(tempApiUrl);
     setShowSettingsModal(false);
   };
+
+  if (!isLoggedIn) {
+    return <LoginPage onLogin={handleLogin} />;
+  }
+
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -73,17 +91,31 @@ export default function App() {
               </button>
             </div>
 
-            {/* Server Settings Button */}
-            <button
-              onClick={() => {
-                setTempApiUrl(apiBaseUrl);
-                setShowSettingsModal(true);
-              }}
-              className="flex items-center space-x-2 bg-gray-50 hover:bg-gray-100 text-gray-700 font-semibold text-xs px-3.5 py-2.5 rounded-xl border border-gray-200 transition-colors"
-            >
-              <Server className="h-4 w-4 text-red-600" />
-              <span className="hidden sm:inline">Server Config</span>
-            </button>
+            {/* Header Actions */}
+            <div className="flex items-center gap-2">
+              {/* Server Settings Button */}
+              <button
+                onClick={() => {
+                  setTempApiUrl(apiBaseUrl);
+                  setShowSettingsModal(true);
+                }}
+                className="flex items-center space-x-2 bg-gray-50 hover:bg-gray-100 text-gray-700 font-semibold text-xs px-3.5 py-2.5 rounded-xl border border-gray-200 transition-colors"
+              >
+                <Server className="h-4 w-4 text-red-600" />
+                <span className="hidden sm:inline">Server Config</span>
+              </button>
+
+              {/* Logout Button */}
+              <button
+                id="logout-btn"
+                onClick={handleLogout}
+                className="flex items-center space-x-2 bg-red-50 hover:bg-red-100 text-red-600 font-semibold text-xs px-3.5 py-2.5 rounded-xl border border-red-200 transition-colors"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
+            </div>
+
           </div>
         </div>
       </header>
